@@ -424,7 +424,7 @@
 
             // Se passou da meia-noite, calcular horas noturnas (22h às 5h)
             let minutosNoturnosReais = 0;
-            let minutosNoturnos Computados = 0;
+            let minutosNoturnosComputados = 0;
             let minutosDiurnosReais = 0;
             
             if (passouMeiaNoite) {
@@ -547,7 +547,6 @@
             const horasTrabalhadasMin = tempoTotalMin - intervaloMin;
             
             // Definir jornada base de cada escala (em minutos trabalhados)
-            let jornadeBaseMin;
             if (escalaSelecionada === '08:48') {
                 jornadeBaseMin = 528; // 8h48min
             } else {
