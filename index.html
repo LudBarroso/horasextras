@@ -231,347 +231,307 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>⏰ Calculadora de Hora Extra</h1>
-            <p>08:48: máx 10h trabalhadas | 07:20: máx 2h extras</p>
+<div class="container">
+    <div class="header">
+        <h1>⏰ Calculadora de Hora Extra</h1>
+        <p>08:48: máx 10h trabalhadas | 07:20: máx 2h extras</p>
+    </div>
+
+    <div class="escala-selector">
+        <label class="escala-option selected">
+            <input type="radio" name="escala" value="08:48" checked onchange="updateEscala()">
+            <div class="escala-time">08:48</div>
+            <div class="escala-label">Jornada de 8h48min</div>
+        </label>
+        <label class="escala-option">
+            <input type="radio" name="escala" value="07:20" onchange="updateEscala()">
+            <div class="escala-time">07:20</div>
+            <div class="escala-label">Jornada de 7h20min</div>
+        </label>
+    </div>
+
+    <div class="input-section">
+        <div class="input-group">
+            <label>🕐 Horário de Entrada</label>
+            <input type="time" id="entrada" value="07:00">
         </div>
-
-        <div class="escala-selector">
-            <label class="escala-option selected">
-                <input type="radio" name="escala" value="08:48" checked onchange="updateEscala()">
-                <div class="escala-time">08:48</div>
-                <div class="escala-label">Jornada de 8h48min</div>
-            </label>
-            <label class="escala-option">
-                <input type="radio" name="escala" value="07:20" onchange="updateEscala()">
-                <div class="escala-time">07:20</div>
-                <div class="escala-label">Jornada de 7h20min</div>
-            </label>
-        </div>
-
-        <div class="input-section">
-            <div class="input-group">
-                <label>🕐 Horário de Entrada</label>
-                <input type="time" id="entrada" value="07:00">
-            </div>
-            <div class="input-group">
-                <label>🕐 Horário de Saída</label>
-                <input type="time" id="saida" value="17:00">
-            </div>
-        </div>
-
-        <button class="calculate-btn" onclick="calcular()">Calcular Jornada</button>
-
-        <div class="results" id="results">
-            <div class="result-card">
-                <div class="result-row">
-                    <span class="result-label">Escala Selecionada</span>
-                    <span class="result-value" id="escala-selected">--</span>
-                </div>
-                <div class="result-row">
-                    <span class="result-label">Tempo Total no Local</span>
-                    <span class="result-value" id="tempo-total">--</span>
-                </div>
-                <div class="result-row">
-                    <span class="result-label">Horas Extras</span>
-                    <span class="result-value" id="horas-trabalhadas">--</span>
-                </div>
-            </div>
-
-            <div id="alert-container"></div>
+        <div class="input-group">
+            <label>🕐 Horário de Saída</label>
+            <input type="time" id="saida" value="17:00">
         </div>
     </div>
 
-    <script>
-        function updateEscala() {
-            const options = document.querySelectorAll('.escala-option');
-            options.forEach(option => option.classList.remove('selected'));
-            document.querySelector('input[name="escala"]:checked').parentElement.classList.add('selected');
+    <button class="calculate-btn" onclick="calcular()">Calcular Jornada</button>
+
+    <div class="results" id="results">
+        <div class="result-card">
+            <div class="result-row">
+                <span class="result-label">Escala Selecionada</span>
+                <span class="result-value" id="escala-selected">--</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Tempo Total no Local</span>
+                <span class="result-value" id="tempo-total">--</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Horas Extras</span>
+                <span class="result-value" id="horas-trabalhadas">--</span>
+            </div>
+        </div>
+
+        <div id="alert-container"></div>
+    </div>
+</div>
+
+<script>
+function updateEscala() {
+    const options = document.querySelectorAll('.escala-option');
+    options.forEach(option => option.classList.remove('selected'));
+    document.querySelector('input[name="escala"]:checked').parentElement.classList.add('selected');
+}
+
+function timeToMinutes(time) {
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
+}
+
+function minutesToTime(minutes) {
+    const hours = Math.floor(Math.abs(minutes) / 60);
+    const mins = Math.abs(minutes) % 60;
+    return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+}
+
+function calcular() {
+    const entrada = document.getElementById('entrada').value;
+    const saida = document.getElementById('saida').value;
+    const escalaSelecionada = document.querySelector('input[name="escala"]:checked').value;
+
+    if (!entrada || !saida) {
+        alert('Por favor, preencha os horários de entrada e saída!');
+        return;
+    }
+
+    let entradaMin = timeToMinutes(entrada);
+    let saidaMin = timeToMinutes(saida);
+
+    const passouMeiaNoite = entradaMin > saidaMin;
+
+    // intervalo
+    let intervaloMin;
+    if (passouMeiaNoite) {
+        intervaloMin = (escalaSelecionada === '08:48') ? 60 : 72;
+    } else {
+        intervaloMin = (escalaSelecionada === '08:48') ? 75 : 60;
+    }
+
+    // jornada base
+    let jornadeBaseMin = (escalaSelecionada === '08:48') ? 528 : 440;
+
+    // tempo total no local
+    let tempoTotalMin = saidaMin - entradaMin;
+    if (passouMeiaNoite) tempoTotalMin += 24 * 60;
+
+    // ===== MADRUGADA =====
+    if (passouMeiaNoite) {
+        const inicioNoturno = 1320; // 22:00
+        const fimNoturno = 300;     // 05:00
+
+        let minutosNoturnosReais = 0;
+        let minutosDiurnosReais = 0;
+
+        let horaAtual = entradaMin;
+        let minutosPercorridos = 0;
+
+        while (minutosPercorridos < tempoTotalMin) {
+            const horaAtualNoDia = horaAtual % 1440;
+            const eNoturno = (horaAtualNoDia >= inicioNoturno) || (horaAtualNoDia < fimNoturno);
+
+            if (eNoturno) minutosNoturnosReais++;
+            else minutosDiurnosReais++;
+
+            horaAtual++;
+            minutosPercorridos++;
         }
 
-        function timeToMinutes(time) {
-            const [hours, minutes] = time.split(':').map(Number);
-            return hours * 60 + minutes;
-        }
+        // ✅ CORREÇÃO PRINCIPAL:
+        // Intervalo é descontado PRIORITARIAMENTE do NOTURNO (não proporcional),
+        // para não alterar a extra quando você só estica a saída.
+        const intervaloNoturno = Math.min(intervaloMin, minutosNoturnosReais);
+        const intervaloDiurno = intervaloMin - intervaloNoturno;
 
-        function minutesToTime(minutes) {
-            const hours = Math.floor(Math.abs(minutes) / 60);
-            const mins = Math.abs(minutes) % 60;
-            return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
-        }
+        const minutosNoturnosTrabalhados = Math.max(0, minutosNoturnosReais - intervaloNoturno);
+        const minutosDiurnosTrabalhados = Math.max(0, minutosDiurnosReais - intervaloDiurno);
 
-        function calcular() {
-            const entrada = document.getElementById('entrada').value;
-            const saida = document.getElementById('saida').value;
-            const escalaSelecionada = document.querySelector('input[name="escala"]:checked').value;
+        // redução noturna
+        const FATOR_NOTURNO = 60 / 52.5;
+        const minutosNoturnosComputados = Math.round(minutosNoturnosTrabalhados * FATOR_NOTURNO);
 
-            if (!entrada || !saida) {
-                alert('Por favor, preencha os horários de entrada e saída!');
-                return;
+        const horasTrabalhadasComputadas = minutosNoturnosComputados + minutosDiurnosTrabalhados;
+        const horasExtrasMin = horasTrabalhadasComputadas - jornadeBaseMin;
+
+        const bonusReducao = minutosNoturnosComputados - minutosNoturnosTrabalhados;
+
+        // TAC
+        let ultrapassouLimite = false;
+        let motivoTAC = '';
+        let excedenteMin = 0;
+
+        if (escalaSelecionada === '08:48') {
+            if (horasExtrasMin > 15) {
+                if (horasTrabalhadasComputadas > 600) {
+                    ultrapassouLimite = true;
+                    excedenteMin = horasTrabalhadasComputadas - 600;
+                    motivoTAC = 'Você ultrapassou o limite de 10 horas trabalhadas!';
+                }
             }
-
-            let entradaMin = timeToMinutes(entrada);
-            let saidaMin = timeToMinutes(saida);
-
-            // Verificar se passou da meia-noite
-            const passouMeiaNoite = entradaMin > saidaMin;
-
-            // Definir intervalo baseado na escala E se passou da meia-noite
-            let intervaloMin;
-            if (passouMeiaNoite) {
-                if (escalaSelecionada === '08:48') {
-                    intervaloMin = 60; // 1h00min para 08:48 noturna
-                } else {
-                    intervaloMin = 72; // 1h12min para 07:20 noturna
-                }
-            } else if (escalaSelecionada === '08:48') {
-                intervaloMin = 75; // 1h15min
-            } else {
-                intervaloMin = 60; // 1h00min
-            }
-
-            // Definir jornada base
-            let jornadeBaseMin;
-            if (escalaSelecionada === '08:48') {
-                jornadeBaseMin = 528; // 8h48min
-            } else {
-                jornadeBaseMin = 440; // 7h20min
-            }
-
-            // Tempo total no local
-            let tempoTotalMin = saidaMin - entradaMin;
-            if (passouMeiaNoite) tempoTotalMin += 24 * 60;
-
-            // ====== MADRUGADA ======
-            if (passouMeiaNoite) {
-                const inicioNoturno = 1320; // 22:00
-                const fimNoturno = 300;     // 05:00
-
-                let minutosNoturnosReais = 0;
-                let minutosDiurnosReais = 0;
-
-                // Percorrer minuto a minuto classificando noturno/diurno (mantive seu jeito para não quebrar nada)
-                let horaAtual = entradaMin;
-                let minutosPercorridos = 0;
-
-                while (minutosPercorridos < tempoTotalMin) {
-                    const horaAtualNoDia = horaAtual % 1440;
-
-                    const eNoturno = (horaAtualNoDia >= inicioNoturno) || (horaAtualNoDia < fimNoturno);
-
-                    if (eNoturno) minutosNoturnosReais++;
-                    else minutosDiurnosReais++;
-
-                    horaAtual++;
-                    minutosPercorridos++;
-                }
-
-                // Descontar intervalo proporcionalmente
-                const proporcaoNoturna = minutosNoturnosReais / tempoTotalMin;
-                const intervaloNoturno = Math.round(intervaloMin * proporcaoNoturna);
-                const intervaloDiurno = intervaloMin - intervaloNoturno;
-
-                const minutosNoturnosTrabalhados = Math.max(0, minutosNoturnosReais - intervaloNoturno);
-                const minutosDiurnosTrabalhados = Math.max(0, minutosDiurnosReais - intervaloDiurno);
-
-                // ===== CORREÇÃO AQUI =====
-                // Redução noturna (52m30s = 60m) deve valer somente na JORNADA NORMAL, não na parte que vira extra
-                const FATOR_NOTURNO = 60 / 52.5;
-
-                const totalTrabalhadoReal = minutosNoturnosTrabalhados + minutosDiurnosTrabalhados;
-
-                const minutosNormaisReais = Math.min(totalTrabalhadoReal, jornadeBaseMin);
-                const minutosExtrasReais  = Math.max(0, totalTrabalhadoReal - jornadeBaseMin);
-
-                const minutosNoturnosNormais = Math.min(minutosNoturnosTrabalhados, minutosNormaisReais);
-                const minutosDiurnosNormais  = minutosNormaisReais - minutosNoturnosNormais;
-
-                const minutosNoturnosComputados = Math.round(minutosNoturnosNormais * FATOR_NOTURNO);
-
-                const horasTrabalhadasComputadas =
-                    minutosDiurnosNormais + minutosNoturnosComputados + minutosExtrasReais;
-
-                const horasExtrasMin = horasTrabalhadasComputadas - jornadeBaseMin;
-
-                // Bônus de redução somente do que foi normal noturno
-                const bonusReducao = minutosNoturnosComputados - minutosNoturnosNormais;
-
-                // Verificar TAC
-                let ultrapassouLimite = false;
-                let motivoTAC = '';
-                let excedenteMin = 0;
-
-                if (escalaSelecionada === '08:48') {
-                    // Mantive sua regra: tolerância 15min
-                    if (horasExtrasMin > 15) {
-                        if (horasTrabalhadasComputadas > 600) {
-                            ultrapassouLimite = true;
-                            excedenteMin = horasTrabalhadasComputadas - 600;
-                            motivoTAC = 'Você ultrapassou o limite de 10 horas trabalhadas!';
-                        }
-                    }
-                } else {
-                    // Escala 07:20: tolerância 10min
-                    if (horasExtrasMin > 10) {
-                        if (horasExtrasMin > 120) {
-                            ultrapassouLimite = true;
-                            excedenteMin = horasExtrasMin - 120;
-                            motivoTAC = 'Você ultrapassou o limite de 2 horas extras!';
-                        }
-                    }
-                }
-
-                // Atualizar resultados
-                document.getElementById('escala-selected').textContent = escalaSelecionada;
-                document.getElementById('tempo-total').textContent =
-                    `${minutesToTime(tempoTotalMin)} (${minutesToTime(minutosNoturnosTrabalhados)} noturnas)`;
-
-                // Tolerância diferente por escala no horário noturno
-                const toleranciaMin = escalaSelecionada === '08:48' ? 15 : 10;
-
-                if (horasExtrasMin >= -toleranciaMin && horasExtrasMin <= toleranciaMin) {
-                    document.getElementById('horas-trabalhadas').textContent = 'Jornada completa';
-                } else if (horasExtrasMin > toleranciaMin) {
-                    document.getElementById('horas-trabalhadas').textContent = `${minutesToTime(horasExtrasMin)} extras`;
-                } else {
-                    document.getElementById('horas-trabalhadas').textContent = `${minutesToTime(Math.abs(horasExtrasMin))} faltantes`;
-                }
-
-                const alertContainer = document.getElementById('alert-container');
-
-                if (ultrapassouLimite) {
-                    alertContainer.innerHTML = `
-                        <div class="alert-tac">
-                            <div class="icon">⚠️</div>
-                            <div class="title">TAC - Termo de Ajuste de Conduta</div>
-                            <div class="message">${motivoTAC}<br><small>Redução noturna aplicada (normal): +${minutesToTime(bonusReducao)}</small></div>
-                            <div class="overtime">Horas computadas: ${minutesToTime(horasTrabalhadasComputadas)}<br>Excedente: ${minutesToTime(excedenteMin)}</div>
-                        </div>
-                    `;
-                } else if (horasExtrasMin > toleranciaMin) {
-                    alertContainer.innerHTML = `
-                        <div class="success-card">
-                            <div class="icon">✅</div>
-                            <div class="title">Hora Extra Registrada</div>
-                            <div class="message">Você fez ${minutesToTime(horasExtrasMin)} de hora extra (dentro do limite)<br><small>Redução noturna (normal): +${minutesToTime(bonusReducao)}</small></div>
-                        </div>
-                    `;
-                } else if (horasExtrasMin >= -toleranciaMin && horasExtrasMin <= toleranciaMin) {
-                    alertContainer.innerHTML = `
-                        <div class="success-card">
-                            <div class="icon">✅</div>
-                            <div class="title">Jornada Normal</div>
-                            <div class="message">Você cumpriu sua jornada corretamente${bonusReducao > 0 ? `<br><small>Redução noturna (normal): +${minutesToTime(bonusReducao)}</small>` : ''}</div>
-                        </div>
-                    `;
-                } else if (horasExtrasMin < -toleranciaMin) {
-                    alertContainer.innerHTML = `
-                        <div class="alert-tac">
-                            <div class="icon">⚠️</div>
-                            <div class="title">Atenção!</div>
-                            <div class="message">Você não completou sua jornada${bonusReducao > 0 ? `<br><small>Mesmo com redução noturna (normal): +${minutesToTime(bonusReducao)}</small>` : ''}</div>
-                            <div class="overtime">${minutesToTime(Math.abs(horasExtrasMin))} faltantes</div>
-                        </div>
-                    `;
-                }
-
-                document.getElementById('results').classList.add('show');
-                return;
-            }
-
-            // ====== DIURNO (não passou da meia-noite) ======
-            const horasTrabalhadasMin = tempoTotalMin - intervaloMin;
-
-            // jornada base
-            if (escalaSelecionada === '08:48') {
-                jornadeBaseMin = 528;
-            } else {
-                jornadeBaseMin = 440;
-            }
-
-            const horasExtrasMin = horasTrabalhadasMin - jornadeBaseMin;
-
-            let ultrapassouLimite = false;
-            let motivoTAC = '';
-            let excedenteMin = 0;
-
-            if (escalaSelecionada === '08:48') {
-                // Mantive sua regra
-                if (horasExtrasMin > 10) {
-                    if (horasTrabalhadasMin > 600) {
-                        ultrapassouLimite = true;
-                        excedenteMin = horasTrabalhadasMin - 600;
-                        motivoTAC = 'Você ultrapassou o limite de 10 horas trabalhadas!';
-                    }
-                }
-            } else {
+        } else {
+            if (horasExtrasMin > 10) {
                 if (horasExtrasMin > 120) {
                     ultrapassouLimite = true;
                     excedenteMin = horasExtrasMin - 120;
                     motivoTAC = 'Você ultrapassou o limite de 2 horas extras!';
                 }
             }
-
-            document.getElementById('escala-selected').textContent = escalaSelecionada;
-            document.getElementById('tempo-total').textContent = minutesToTime(tempoTotalMin);
-
-            // Exibição com tolerância padrão de 10min (mantive seu comportamento)
-            if (horasExtrasMin >= -10 && horasExtrasMin <= 10) {
-                document.getElementById('horas-trabalhadas').textContent = 'Jornada completa';
-            } else if (horasExtrasMin > 10) {
-                document.getElementById('horas-trabalhadas').textContent = `${minutesToTime(horasExtrasMin)} extras`;
-            } else {
-                document.getElementById('horas-trabalhadas').textContent = `${minutesToTime(Math.abs(horasExtrasMin))} faltantes`;
-            }
-
-            const alertContainer = document.getElementById('alert-container');
-
-            if (ultrapassouLimite) {
-                alertContainer.innerHTML = `
-                    <div class="alert-tac">
-                        <div class="icon">⚠️</div>
-                        <div class="title">TAC - Termo de Ajuste de Conduta</div>
-                        <div class="message">${motivoTAC}</div>
-                        <div class="overtime">Horas trabalhadas: ${minutesToTime(horasTrabalhadasMin)}<br>Excedente: ${minutesToTime(excedenteMin)}</div>
-                    </div>
-                `;
-            } else if (horasExtrasMin > 10) {
-                alertContainer.innerHTML = `
-                    <div class="success-card">
-                        <div class="icon">✅</div>
-                        <div class="title">Hora Extra Registrada</div>
-                        <div class="message">Você fez ${minutesToTime(horasExtrasMin)} de hora extra (dentro do limite permitido)</div>
-                    </div>
-                `;
-            } else if (horasExtrasMin >= -10 && horasExtrasMin <= 10) {
-                alertContainer.innerHTML = `
-                    <div class="success-card">
-                        <div class="icon">✅</div>
-                        <div class="title">Jornada Normal</div>
-                        <div class="message">Você cumpriu sua jornada corretamente</div>
-                    </div>
-                `;
-            } else if (horasExtrasMin < -10) {
-                alertContainer.innerHTML = `
-                    <div class="alert-tac">
-                        <div class="icon">⚠️</div>
-                        <div class="title">Atenção!</div>
-                        <div class="message">Você não completou sua jornada</div>
-                        <div class="overtime">${minutesToTime(Math.abs(horasExtrasMin))} faltantes</div>
-                    </div>
-                `;
-            }
-
-            document.getElementById('results').classList.add('show');
         }
 
-        // Permitir Enter para calcular
-        document.querySelectorAll('input[type="time"]').forEach(input => {
-            input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') calcular();
-            });
-        });
-    </script>
+        // UI
+        document.getElementById('escala-selected').textContent = escalaSelecionada;
+        document.getElementById('tempo-total').textContent =
+            `${minutesToTime(tempoTotalMin)} (${minutesToTime(minutosNoturnosTrabalhados)} noturnas)`;
+
+        const toleranciaMin = (escalaSelecionada === '08:48') ? 15 : 10;
+
+        if (horasExtrasMin >= -toleranciaMin && horasExtrasMin <= toleranciaMin) {
+            document.getElementById('horas-trabalhadas').textContent = 'Jornada completa';
+        } else if (horasExtrasMin > toleranciaMin) {
+            document.getElementById('horas-trabalhadas').textContent = `${minutesToTime(horasExtrasMin)} extras`;
+        } else {
+            document.getElementById('horas-trabalhadas').textContent = `${minutesToTime(Math.abs(horasExtrasMin))} faltantes`;
+        }
+
+        const alertContainer = document.getElementById('alert-container');
+
+        if (ultrapassouLimite) {
+            alertContainer.innerHTML = `
+                <div class="alert-tac">
+                    <div class="icon">⚠️</div>
+                    <div class="title">TAC - Termo de Ajuste de Conduta</div>
+                    <div class="message">${motivoTAC}<br><small>Redução noturna aplicada: +${minutesToTime(bonusReducao)}</small></div>
+                    <div class="overtime">Horas computadas: ${minutesToTime(horasTrabalhadasComputadas)}<br>Excedente: ${minutesToTime(excedenteMin)}</div>
+                </div>
+            `;
+        } else if (horasExtrasMin > toleranciaMin) {
+            alertContainer.innerHTML = `
+                <div class="success-card">
+                    <div class="icon">✅</div>
+                    <div class="title">Hora Extra Registrada</div>
+                    <div class="message">Você fez ${minutesToTime(horasExtrasMin)} de hora extra (dentro do limite)<br><small>Redução noturna: +${minutesToTime(bonusReducao)}</small></div>
+                </div>
+            `;
+        } else if (horasExtrasMin >= -toleranciaMin && horasExtrasMin <= toleranciaMin) {
+            alertContainer.innerHTML = `
+                <div class="success-card">
+                    <div class="icon">✅</div>
+                    <div class="title">Jornada Normal</div>
+                    <div class="message">Você cumpriu sua jornada corretamente${bonusReducao > 0 ? `<br><small>Redução noturna: +${minutesToTime(bonusReducao)}</small>` : ''}</div>
+                </div>
+            `;
+        } else {
+            alertContainer.innerHTML = `
+                <div class="alert-tac">
+                    <div class="icon">⚠️</div>
+                    <div class="title">Atenção!</div>
+                    <div class="message">Você não completou sua jornada${bonusReducao > 0 ? `<br><small>Mesmo com redução noturna: +${minutesToTime(bonusReducao)}</small>` : ''}</div>
+                    <div class="overtime">${minutesToTime(Math.abs(horasExtrasMin))} faltantes</div>
+                </div>
+            `;
+        }
+
+        document.getElementById('results').classList.add('show');
+        return;
+    }
+
+    // ===== DIURNO =====
+    const horasTrabalhadasMin = tempoTotalMin - intervaloMin;
+    const horasExtrasMin = horasTrabalhadasMin - jornadeBaseMin;
+
+    let ultrapassouLimite = false;
+    let motivoTAC = '';
+    let excedenteMin = 0;
+
+    if (escalaSelecionada === '08:48') {
+        if (horasExtrasMin > 10) {
+            if (horasTrabalhadasMin > 600) {
+                ultrapassouLimite = true;
+                excedenteMin = horasTrabalhadasMin - 600;
+                motivoTAC = 'Você ultrapassou o limite de 10 horas trabalhadas!';
+            }
+        }
+    } else {
+        if (horasExtrasMin > 120) {
+            ultrapassouLimite = true;
+            excedenteMin = horasExtrasMin - 120;
+            motivoTAC = 'Você ultrapassou o limite de 2 horas extras!';
+        }
+    }
+
+    document.getElementById('escala-selected').textContent = escalaSelecionada;
+    document.getElementById('tempo-total').textContent = minutesToTime(tempoTotalMin);
+
+    if (horasExtrasMin >= -10 && horasExtrasMin <= 10) {
+        document.getElementById('horas-trabalhadas').textContent = 'Jornada completa';
+    } else if (horasExtrasMin > 10) {
+        document.getElementById('horas-trabalhadas').textContent = `${minutesToTime(horasExtrasMin)} extras`;
+    } else {
+        document.getElementById('horas-trabalhadas').textContent = `${minutesToTime(Math.abs(horasExtrasMin))} faltantes`;
+    }
+
+    const alertContainer = document.getElementById('alert-container');
+
+    if (ultrapassouLimite) {
+        alertContainer.innerHTML = `
+            <div class="alert-tac">
+                <div class="icon">⚠️</div>
+                <div class="title">TAC - Termo de Ajuste de Conduta</div>
+                <div class="message">${motivoTAC}</div>
+                <div class="overtime">Horas trabalhadas: ${minutesToTime(horasTrabalhadasMin)}<br>Excedente: ${minutesToTime(excedenteMin)}</div>
+            </div>
+        `;
+    } else if (horasExtrasMin > 10) {
+        alertContainer.innerHTML = `
+            <div class="success-card">
+                <div class="icon">✅</div>
+                <div class="title">Hora Extra Registrada</div>
+                <div class="message">Você fez ${minutesToTime(horasExtrasMin)} de hora extra (dentro do limite permitido)</div>
+            </div>
+        `;
+    } else if (horasExtrasMin >= -10 && horasExtrasMin <= 10) {
+        alertContainer.innerHTML = `
+            <div class="success-card">
+                <div class="icon">✅</div>
+                <div class="title">Jornada Normal</div>
+                <div class="message">Você cumpriu sua jornada corretamente</div>
+            </div>
+        `;
+    } else {
+        alertContainer.innerHTML = `
+            <div class="alert-tac">
+                <div class="icon">⚠️</div>
+                <div class="title">Atenção!</div>
+                <div class="message">Você não completou sua jornada</div>
+                <div class="overtime">${minutesToTime(Math.abs(horasExtrasMin))} faltantes</div>
+            </div>
+        `;
+    }
+
+    document.getElementById('results').classList.add('show');
+}
+
+document.querySelectorAll('input[type="time"]').forEach(input => {
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') calcular();
+    });
+});
+</script>
 </body>
 </html>
