@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Horas Extras - TAC</title>
+    <title>Calculadora de Hora Extra</title>
     <style>
         * {
             margin: 0;
@@ -12,7 +12,7 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
@@ -23,96 +23,168 @@
 
         .container {
             background: white;
-            border-radius: 20px;
+            border-radius: 24px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             padding: 40px;
             max-width: 600px;
             width: 100%;
         }
 
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
+        .header {
             text-align: center;
+            margin-bottom: 40px;
         }
 
-        .subtitle {
-            color: #666;
-            text-align: center;
-            margin-bottom: 30px;
+        .header h1 {
+            color: #1a202c;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #718096;
             font-size: 14px;
         }
 
-        .form-group {
-            margin-bottom: 25px;
+        .escala-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .escala-option {
+            background: #f7fafc;
+            border: 3px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .escala-option:hover {
+            border-color: #667eea;
+            background: #edf2f7;
+        }
+
+        .escala-option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #ebf4ff 0%, #e0e7ff 100%);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .escala-option input[type="radio"] {
+            display: none;
+        }
+
+        .escala-time {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .escala-option.selected .escala-time {
+            color: #667eea;
+        }
+
+        .escala-label {
+            font-size: 12px;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .intervalo-info {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 12px 16px;
+            margin-bottom: 32px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #78350f;
+            text-align: center;
+        }
+
+        .input-section {
+            background: #f7fafc;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group:last-child {
+            margin-bottom: 0;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
-            color: #555;
+            font-size: 13px;
             font-weight: 600;
-            font-size: 14px;
+            color: #4a5568;
+            margin-bottom: 8px;
         }
 
-        select, input[type="time"] {
+        input[type="time"] {
             width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s ease;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
             background: white;
+            transition: all 0.2s;
         }
 
-        select:focus, input[type="time"]:focus {
+        input[type="time"]:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .time-inputs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        button {
+        .calculate-btn {
             width: 100%;
-            padding: 15px;
+            padding: 16px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            margin-top: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
 
-        button:hover {
+        .calculate-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
         }
 
-        button:active {
+        .calculate-btn:active {
             transform: translateY(0);
         }
 
-        .result {
-            margin-top: 30px;
-            padding: 25px;
-            border-radius: 15px;
+        .results {
+            margin-top: 32px;
             display: none;
-            animation: slideIn 0.5s ease;
+            animation: slideUp 0.4s ease-out;
         }
 
-        @keyframes slideIn {
+        .results.show {
+            display: block;
+        }
+
+        @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(-10px);
+                transform: translateY(20px);
             }
             to {
                 opacity: 1;
@@ -120,286 +192,341 @@
             }
         }
 
-        .result.success {
-            background: #d4edda;
-            border: 2px solid #28a745;
-            display: block;
+        .result-card {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            border: 2px solid #e2e8f0;
         }
 
-        .result.warning {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            display: block;
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
         }
 
-        .result.error {
-            background: #f8d7da;
-            border: 2px solid #dc3545;
-            display: block;
+        .result-row:last-child {
+            border-bottom: none;
         }
 
-        .result-title {
+        .result-label {
+            font-size: 14px;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .result-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .alert-tac {
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            border: 2px solid #fc8181;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .alert-tac .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .alert-tac .title {
             font-size: 20px;
             font-weight: 700;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            color: #c53030;
+            margin-bottom: 8px;
         }
 
-        .result.success .result-title {
-            color: #155724;
+        .alert-tac .message {
+            font-size: 14px;
+            color: #742a2a;
         }
 
-        .result.warning .result-title {
-            color: #856404;
-        }
-
-        .result.error .result-title {
-            color: #721c24;
-        }
-
-        .result-details {
-            line-height: 1.8;
-            font-size: 15px;
-        }
-
-        .result.success .result-details {
-            color: #155724;
-        }
-
-        .result.warning .result-details {
-            color: #856404;
-        }
-
-        .result.error .result-details {
-            color: #721c24;
-        }
-
-        .detail-item {
-            margin-bottom: 10px;
-            padding-left: 20px;
-            position: relative;
-        }
-
-        .detail-item:before {
-            content: "•";
-            position: absolute;
-            left: 5px;
-            font-weight: bold;
-        }
-
-        .highlight {
+        .alert-tac .overtime {
+            font-size: 28px;
             font-weight: 700;
-            font-size: 17px;
+            color: #c53030;
+            margin-top: 12px;
         }
 
-        .info-box {
-            background: #e7f3ff;
-            border-left: 4px solid #2196F3;
-            padding: 15px;
-            margin-bottom: 25px;
-            border-radius: 5px;
-            font-size: 13px;
-            color: #0c5460;
+        .success-card {
+            background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+            border: 2px solid #68d391;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 16px;
         }
 
-        .icon {
-            font-size: 24px;
+        .success-card .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
         }
 
-        @media (max-width: 600px) {
+        .success-card .title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2f855a;
+            margin-bottom: 8px;
+        }
+
+        .success-card .message {
+            font-size: 14px;
+            color: #22543d;
+        }
+
+        @media (max-width: 768px) {
             .container {
-                padding: 25px;
+                padding: 24px;
             }
 
-            h1 {
+            .header h1 {
                 font-size: 24px;
-            }
-
-            .time-inputs {
-                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>⏰ Calculadora de Horas Extras</h1>
-        <p class="subtitle">Verificação de TAC - Termo de Acordo de Compensação</p>
-
-        <div class="info-box">
-            <strong>ℹ️ Informações importantes:</strong><br>
-            • <strong>DÁ TAC:</strong> Quando trabalhar MAIS de 10 horas<br>
-            • <strong>Tolerância:</strong> Até 10min de extra não gera hora extra<br>
-            • Horas extras só contam após os 10min de tolerância<br>
-            • Escala 08:48 → Intervalo: 1h12min<br>
-            • Escala 07:20 → Intervalo: 1h00min
+        <div class="header">
+            <h1>⏰ Calculadora de Hora Extra</h1>
+            <p>08:48: máx 10h trabalhadas | 07:20: máx 2h extras</p>
         </div>
 
-        <form id="horasForm">
-            <div class="form-group">
-                <label for="escala">Escala de Trabalho:</label>
-                <select id="escala" required>
-                    <option value="">Selecione sua escala</option>
-                    <option value="08:48">08:48 (Intervalo de 1h12min)</option>
-                    <option value="07:20">07:20 (Intervalo de 1h00min)</option>
-                </select>
-            </div>
+        <div class="escala-selector">
+            <label class="escala-option selected">
+                <input type="radio" name="escala" value="08:48" checked onchange="updateEscala()">
+                <div class="escala-time">08:48</div>
+                <div class="escala-label">1h15min de intervalo</div>
+            </label>
+            <label class="escala-option">
+                <input type="radio" name="escala" value="07:20" onchange="updateEscala()">
+                <div class="escala-time">07:20</div>
+                <div class="escala-label">1h00min de intervalo</div>
+            </label>
+        </div>
 
-            <div class="form-group">
-                <label>Horários:</label>
-                <div class="time-inputs">
-                    <div>
-                        <label for="entrada" style="font-weight: normal; font-size: 13px;">Entrada:</label>
-                        <input type="time" id="entrada" required>
-                    </div>
-                    <div>
-                        <label for="saida" style="font-weight: normal; font-size: 13px;">Saída:</label>
-                        <input type="time" id="saida" required>
-                    </div>
+        <div class="intervalo-info" id="intervalo-info">
+            Intervalo: 1h15min
+        </div>
+
+        <div class="input-section">
+            <div class="input-group">
+                <label>🕐 Horário de Entrada</label>
+                <input type="time" id="entrada" value="07:00">
+            </div>
+            <div class="input-group">
+                <label>🕐 Horário de Saída</label>
+                <input type="time" id="saida" value="17:00">
+            </div>
+        </div>
+
+        <button class="calculate-btn" onclick="calcular()">Calcular Jornada</button>
+
+        <div class="results" id="results">
+            <div class="result-card">
+                <div class="result-row">
+                    <span class="result-label">Escala Selecionada</span>
+                    <span class="result-value" id="escala-selected">--</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Intervalo</span>
+                    <span class="result-value" id="intervalo-value">--</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Tempo Total no Local</span>
+                    <span class="result-value" id="tempo-total">--</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Horas Extras</span>
+                    <span class="result-value" id="horas-trabalhadas">--</span>
                 </div>
             </div>
 
-            <button type="submit">🔍 Verificar Horas</button>
-        </form>
-
-        <div id="resultado" class="result"></div>
+            <div id="alert-container"></div>
+        </div>
     </div>
 
     <script>
-        // Função para converter horário HH:MM para minutos
-        function horarioParaMinutos(horario) {
-            const [horas, minutos] = horario.split(':').map(Number);
-            return horas * 60 + minutos;
-        }
-
-        // Função para converter minutos para HH:MM
-        function minutosParaHorario(minutos) {
-            const horas = Math.floor(minutos / 60);
-            const mins = minutos % 60;
-            return `${String(horas).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
-        }
-
-        // Função para formatar tempo em horas e minutos
-        function formatarTempo(minutos) {
-            const horas = Math.floor(minutos / 60);
-            const mins = minutos % 60;
+        function updateEscala() {
+            const escalaSelecionada = document.querySelector('input[name="escala"]:checked').value;
+            const options = document.querySelectorAll('.escala-option');
             
-            if (horas === 0) {
-                return `${mins} minuto${mins !== 1 ? 's' : ''}`;
-            } else if (mins === 0) {
-                return `${horas} hora${horas !== 1 ? 's' : ''}`;
+            options.forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            document.querySelector('input[name="escala"]:checked').parentElement.classList.add('selected');
+            
+            const intervaloInfo = document.getElementById('intervalo-info');
+            if (escalaSelecionada === '08:48') {
+                intervaloInfo.textContent = 'Intervalo: 1h15min';
             } else {
-                return `${horas}h${String(mins).padStart(2, '0')}min`;
+                intervaloInfo.textContent = 'Intervalo: 1h00min';
             }
         }
 
-        document.getElementById('horasForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        function timeToMinutes(time) {
+            const [hours, minutes] = time.split(':').map(Number);
+            return hours * 60 + minutes;
+        }
 
-            const escala = document.getElementById('escala').value;
+        function minutesToTime(minutes) {
+            const hours = Math.floor(Math.abs(minutes) / 60);
+            const mins = Math.abs(minutes) % 60;
+            return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+        }
+
+        function calcular() {
             const entrada = document.getElementById('entrada').value;
             const saida = document.getElementById('saida').value;
+            const escalaSelecionada = document.querySelector('input[name="escala"]:checked').value;
 
-            if (!escala || !entrada || !saida) {
-                mostrarResultado('error', '❌ Erro', 'Por favor, preencha todos os campos!');
+            if (!entrada || !saida) {
+                alert('Por favor, preencha os horários de entrada e saída!');
                 return;
             }
 
-            calcularHoras(escala, entrada, saida);
+            const entradaMin = timeToMinutes(entrada);
+            const saidaMin = timeToMinutes(saida);
+            
+            // Calcular tempo total no local
+            let tempoTotalMin = saidaMin - entradaMin;
+            if (tempoTotalMin < 0) tempoTotalMin += 24 * 60; // Caso passe da meia-noite
+
+            // Definir intervalo baseado na escala
+            let intervaloMin;
+            if (escalaSelecionada === '08:48') {
+                intervaloMin = 75; // 1h15min
+            } else {
+                intervaloMin = 60; // 1h00min
+            }
+
+            // Calcular horas efetivamente trabalhadas
+            const horasTrabalhadasMin = tempoTotalMin - intervaloMin;
+            
+            // Definir jornada base de cada escala (em minutos trabalhados)
+            let jornadeBaseMin;
+            if (escalaSelecionada === '08:48') {
+                jornadeBaseMin = 528; // 8h48min
+            } else {
+                jornadeBaseMin = 440; // 7h20min
+            }
+            
+            // Calcular horas extras
+            const horasExtrasMin = horasTrabalhadasMin - jornadeBaseMin;
+            
+            // Limite de 2 horas extras = 120 minutos
+            const limiteExtras = 120;
+            
+            // Para escala 08:48: também precisa respeitar o limite de 10h no local
+            // 10h no local = 600 min - 75 min (intervalo) = 525 min trabalhados
+            // Mas como a jornada já é 528 min (8h48), então o limite no local é:
+            // 600 min (10h no local) - 75 min (intervalo) = 525 min trabalhados
+            // Mas a jornada base já é 528... então na prática não pode fazer hora extra
+            // Vou usar: 10h no local com intervalo de 1h15 = 600 - 75 = 525 min trabalhados
+            
+            let ultrapassouLimite = false;
+            let motivoTAC = '';
+            let excedenteMin = 0;
+            
+            if (escalaSelecionada === '08:48') {
+                // ESCALA 08:48
+                // Tolerância: até 10min de EXTRAS da jornada = desconsiderar tudo
+                // Acima de 10min de EXTRAS = conta tudo e verifica se passou 10h
+                
+                if (horasExtrasMin > 10) {
+                    // Fez mais de 10min de extras, então conta tudo
+                    // Verifica se ultrapassou 10h trabalhadas
+                    if (horasTrabalhadasMin > 600) {
+                        ultrapassouLimite = true;
+                        excedenteMin = horasTrabalhadasMin - 600;
+                        motivoTAC = 'Você ultrapassou o limite de 10 horas trabalhadas!';
+                    }
+                }
+                // Se fez até 10min de extras, desconsiderar (não gera TAC)
+            } else {
+                // ESCALA 07:20
+                // Limite: 2h extras (120 minutos)
+                // SEM tolerância - qualquer valor acima de 2h gera TAC
+                
+                if (horasExtrasMin > 120) {
+                    ultrapassouLimite = true;
+                    excedenteMin = horasExtrasMin - 120;
+                    motivoTAC = 'Você ultrapassou o limite de 2 horas extras!';
+                }
+            }
+
+            // Atualizar resultados
+            document.getElementById('escala-selected').textContent = escalaSelecionada;
+            document.getElementById('intervalo-value').textContent = minutesToTime(intervaloMin);
+            document.getElementById('tempo-total').textContent = minutesToTime(tempoTotalMin);
+            document.getElementById('horas-trabalhadas').textContent = 
+                horasExtrasMin >= 0 
+                    ? `${minutesToTime(horasExtrasMin)} extras` 
+                    : `${minutesToTime(Math.abs(horasExtrasMin))} faltantes`;
+
+            // Gerar alerta ou sucesso
+            const alertContainer = document.getElementById('alert-container');
+            
+            if (ultrapassouLimite) {
+                // Ultrapassou o limite - gerar TAC
+                alertContainer.innerHTML = `
+                    <div class="alert-tac">
+                        <div class="icon">⚠️</div>
+                        <div class="title">TAC - Termo de Ajuste de Conduta</div>
+                        <div class="message">${motivoTAC}</div>
+                        <div class="overtime">Horas trabalhadas: ${minutesToTime(horasTrabalhadasMin)}<br>Excedente: ${minutesToTime(excedenteMin)}</div>
+                    </div>
+                `;
+            } else if (horasExtrasMin > 10) {
+                // Fez hora extra mas dentro do limite
+                alertContainer.innerHTML = `
+                    <div class="success-card">
+                        <div class="icon">✅</div>
+                        <div class="title">Hora Extra Registrada</div>
+                        <div class="message">Você fez ${minutesToTime(horasExtrasMin)} de hora extra (dentro do limite permitido)</div>
+                    </div>
+                `;
+            } else if (horasExtrasMin >= -10 && horasExtrasMin <= 10) {
+                // Dentro da tolerância - jornada normal
+                alertContainer.innerHTML = `
+                    <div class="success-card">
+                        <div class="icon">✅</div>
+                        <div class="title">Jornada Normal</div>
+                        <div class="message">Você cumpriu sua jornada corretamente</div>
+                    </div>
+                `;
+            } else if (horasExtrasMin < -10) {
+                // Trabalhou menos que a jornada
+                alertContainer.innerHTML = `
+                    <div class="alert-tac">
+                        <div class="icon">⚠️</div>
+                        <div class="title">Atenção!</div>
+                        <div class="message">Você não completou sua jornada</div>
+                        <div class="overtime">${minutesToTime(Math.abs(horasExtrasMin))} faltantes</div>
+                    </div>
+                `;
+            }
+
+            // Mostrar resultados
+            document.getElementById('results').classList.add('show');
+        }
+
+        // Permitir Enter para calcular
+        document.querySelectorAll('input[type="time"]').forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') calcular();
+            });
         });
-
-        function calcularHoras(escala, entrada, saida) {
-            // Configurações por escala
-            const config = {
-                '08:48': { jornada: 528, intervalo: 72 },  // 8h48 = 528min, 1h12 = 72min
-                '07:20': { jornada: 440, intervalo: 60 }   // 7h20 = 440min, 1h00 = 60min
-            };
-
-            const { jornada, intervalo } = config[escala];
-            const tolerancia = 10; // 10 minutos
-            const limiteMaximo = 600; // 10 horas = 600 minutos
-
-            // Converter horários para minutos
-            let entradaMin = horarioParaMinutos(entrada);
-            let saidaMin = horarioParaMinutos(saida);
-
-            // Se saída for menor que entrada, é no dia seguinte
-            if (saidaMin <= entradaMin) {
-                saidaMin += 1440; // Adiciona 24 horas
-            }
-
-            // Calcular tempo total no local de trabalho
-            const tempoTotal = saidaMin - entradaMin;
-
-            // Tempo efetivamente trabalhado (descontando intervalo)
-            const tempoTrabalhado = tempoTotal - intervalo;
-
-            // Verificar se ultrapassa o limite de 10 horas
-            const ultrapassaLimite = tempoTrabalhado > limiteMaximo;
-            
-            // Calcular horas extras em relação à jornada prevista
-            let horasExtras = tempoTrabalhado - jornada;
-            
-            // Aplicar tolerância de 10 minutos - se fez até 10min extra, não conta nada
-            if (horasExtras > 0 && horasExtras <= tolerancia) {
-                horasExtras = 0; // Dentro da tolerância, não conta
-            } else if (horasExtras > tolerancia) {
-                horasExtras = horasExtras - tolerancia; // Desconta a tolerância
-            } else {
-                horasExtras = 0; // Trabalhou menos que a jornada
-            }
-
-            // Calcular horário máximo permitido (10h trabalhadas)
-            const tempoMaximoPermitido = limiteMaximo + intervalo;
-            const saidaMaximaMin = entradaMin + tempoMaximoPermitido;
-            const saidaMaxima = minutosParaHorario(saidaMaximaMin % 1440);
-
-            // Montar resultado
-            if (ultrapassaLimite) {
-                // PASSOU DE 10 HORAS = DÁ O TAC! (VERMELHO - ALERTA)
-                const tempoAlem10h = tempoTrabalhado - limiteMaximo;
-                mostrarResultado('error', '⚠️ DÁ O TAC!', 
-                    `<div class="detail-item">Jornada prevista: <strong>${formatarTempo(jornada)}</strong></div>
-                    <div class="detail-item">Tempo trabalhado: <strong>${formatarTempo(tempoTrabalhado)}</strong></div>
-                    ${horasExtras > 0 ? `<div class="detail-item">Horas extras (após tolerância): <strong class="highlight">${formatarTempo(horasExtras)}</strong></div>` : ''}
-                    <div class="detail-item">Tempo além de 10h: <strong>${formatarTempo(tempoAlem10h)}</strong></div>
-                    <hr style="margin: 15px 0; border: none; border-top: 1px solid #dc3545;">
-                    <div class="detail-item"><strong>⚠️ Você ultrapassou as 10 horas trabalhadas!</strong></div>
-                    <div class="detail-item" style="margin-top: 10px;">🎯 Condição para TAC foi atingida!</div>
-                    ${horasExtras === 0 && tempoAlem10h <= tolerancia ? `<div class="detail-item" style="margin-top: 10px; font-size: 13px;">💡 Você passou de 10h mas está dentro da tolerância de 10min.</div>` : ''}`
-                );
-            } else {
-                // NÃO CHEGOU EM 10H = NÃO DÁ TAC (VERDE - TRANQUILO)
-                const faltaPara10h = limiteMaximo - tempoTrabalhado;
-                mostrarResultado('success', '✅ NÃO DÁ O TAC', 
-                    `<div class="detail-item">Jornada prevista: <strong>${formatarTempo(jornada)}</strong></div>
-                    <div class="detail-item">Tempo trabalhado: <strong>${formatarTempo(tempoTrabalhado)}</strong></div>
-                    ${horasExtras > 0 ? `<div class="detail-item">Horas extras (após tolerância): <strong>${formatarTempo(horasExtras)}</strong></div>` : ''}
-                    <div class="detail-item">Limite mínimo: <strong>Mais de 10 horas trabalhadas</strong></div>
-                    <hr style="margin: 15px 0; border: none; border-top: 1px solid #28a745;">
-                    <div class="detail-item"><strong>✅ Você não atingiu o limite para TAC</strong></div>
-                    <div class="detail-item">Falta trabalhar: <strong class="highlight">${formatarTempo(faltaPara10h)}</strong></div>
-                    <div class="detail-item">Para dar o TAC, saia depois das: <strong class="highlight">${saidaMaxima}</strong></div>
-                    ${horasExtras === 0 && tempoTrabalhado > jornada ? `<div class="detail-item" style="margin-top: 10px; font-size: 13px;">💡 Você fez hora extra mas está dentro da tolerância de 10min.</div>` : ''}`
-                );
-            }
-        }
-
-        function mostrarResultado(tipo, titulo, detalhes) {
-            const resultado = document.getElementById('resultado');
-            resultado.className = `result ${tipo}`;
-            resultado.innerHTML = `
-                <div class="result-title">
-                    ${titulo}
-                </div>
-                <div class="result-details">
-                    ${detalhes}
-                </div>
-            `;
-            resultado.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
     </script>
 </body>
 </html>
