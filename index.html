@@ -1,536 +1,579 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Hora Extra</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calculadora de Hora Extra</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-        .container {
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
-            max-width: 600px;
-            width: 100%;
-        }
+    .container {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+    }
 
-        .header { text-align: center; margin-bottom: 40px; }
+    .header { text-align: center; margin-bottom: 32px; }
 
-        .header h1 {
-            color: #1a202c;
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
+    .header h1 {
+      color: #1a202c;
+      font-size: 30px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
 
-        .header p { color: #718096; font-size: 14px; }
+    .header p { color: #718096; font-size: 13px; }
 
-        .escala-selector {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 32px;
-        }
+    .escala-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
 
-        .escala-option {
-            background: #f7fafc;
-            border: 3px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 24px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
+    .escala-option {
+      background: #f7fafc;
+      border: 3px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s;
+      user-select: none;
+    }
 
-        .escala-option:hover {
-            border-color: #667eea;
-            background: #edf2f7;
-        }
+    .escala-option:hover { border-color: #667eea; background: #edf2f7; }
+    .escala-option.selected {
+      border-color: #667eea;
+      background: linear-gradient(135deg, #ebf4ff 0%, #e0e7ff 100%);
+      box-shadow: 0 4px 12px rgba(102,126,234,0.18);
+    }
 
-        .escala-option.selected {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #ebf4ff 0%, #e0e7ff 100%);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-        }
+    .escala-option input[type="radio"] { display:none; }
 
-        .escala-option input[type="radio"] { display: none; }
+    .escala-time {
+      font-size: 28px;
+      font-weight: 800;
+      color: #2d3748;
+      margin-bottom: 6px;
+    }
+    .escala-option.selected .escala-time { color: #667eea; }
 
-        .escala-time {
-            font-size: 28px;
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 8px;
-        }
+    .escala-label { font-size: 12px; color:#718096; font-weight:600; }
 
-        .escala-option.selected .escala-time { color: #667eea; }
+    .input-section {
+      background: #f7fafc;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
 
-        .escala-label {
-            font-size: 12px;
-            color: #718096;
-            font-weight: 500;
-        }
+    .input-group { margin-bottom: 16px; }
+    .input-group:last-child { margin-bottom: 0; }
 
-        .input-section {
-            background: #f7fafc;
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 24px;
-        }
+    label {
+      display:block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #4a5568;
+      margin-bottom: 8px;
+    }
 
-        .input-group { margin-bottom: 20px; }
-        .input-group:last-child { margin-bottom: 0; }
+    input[type="time"] {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #2d3748;
+      background: #fff;
+      transition: all 0.2s;
+    }
 
-        label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: #4a5568;
-            margin-bottom: 8px;
-        }
+    input[type="time"]:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102,126,234,0.12);
+    }
 
-        input[type="time"] {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 600;
-            color: #2d3748;
-            background: white;
-            transition: all 0.2s;
-        }
+    .calculate-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.25s;
+      box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+    }
+    .calculate-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(102,126,234,0.5); }
+    .calculate-btn:active { transform: translateY(0); }
 
-        input[type="time"]:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
+    .results { margin-top: 26px; display:none; animation: up 0.35s ease-out; }
+    .results.show { display:block; }
 
-        .calculate-btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
+    @keyframes up {
+      from { opacity:0; transform: translateY(18px); }
+      to { opacity:1; transform: translateY(0); }
+    }
 
-        .calculate-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-        }
+    .result-card {
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 14px;
+      border: 2px solid #e2e8f0;
+    }
 
-        .calculate-btn:active { transform: translateY(0); }
+    .result-row {
+      display:flex;
+      justify-content: space-between;
+      align-items:center;
+      padding: 10px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .result-row:last-child { border-bottom:none; }
 
-        .results {
-            margin-top: 32px;
-            display: none;
-            animation: slideUp 0.4s ease-out;
-        }
+    .result-label { font-size: 13px; color:#718096; font-weight:600; }
+    .result-value { font-size: 17px; color:#2d3748; font-weight:800; }
 
-        .results.show { display: block; }
+    .note {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #718096;
+      text-align: center;
+    }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+    .alert-tac {
+      background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+      border: 2px solid #fc8181;
+      border-radius: 16px;
+      padding: 18px;
+      text-align:center;
+      margin-top: 14px;
+    }
+    .alert-tac .icon { font-size: 44px; margin-bottom: 8px; }
+    .alert-tac .title { font-size: 18px; font-weight: 900; color:#c53030; margin-bottom: 6px; }
+    .alert-tac .message { font-size: 13px; color:#742a2a; }
+    .alert-tac .overtime { font-size: 22px; font-weight: 900; color:#c53030; margin-top: 10px; }
 
-        .result-card {
-            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 16px;
-            border: 2px solid #e2e8f0;
-        }
-
-        .result-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .result-row:last-child { border-bottom: none; }
-
-        .result-label {
-            font-size: 14px;
-            color: #718096;
-            font-weight: 500;
-        }
-
-        .result-value {
-            font-size: 18px;
-            font-weight: 700;
-            color: #2d3748;
-        }
-
-        .alert-tac {
-            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
-            border: 2px solid #fc8181;
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            margin-top: 16px;
-        }
-
-        .alert-tac .icon { font-size: 48px; margin-bottom: 12px; }
-        .alert-tac .title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #c53030;
-            margin-bottom: 8px;
-        }
-        .alert-tac .message { font-size: 14px; color: #742a2a; }
-        .alert-tac .overtime {
-            font-size: 28px;
-            font-weight: 700;
-            color: #c53030;
-            margin-top: 12px;
-        }
-
-        .success-card {
-            background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
-            border: 2px solid #68d391;
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            margin-top: 16px;
-        }
-
-        .success-card .icon { font-size: 48px; margin-bottom: 12px; }
-        .success-card .title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #2f855a;
-            margin-bottom: 8px;
-        }
-        .success-card .message { font-size: 14px; color: #22543d; }
-
-        @media (max-width: 768px) {
-            .container { padding: 24px; }
-            .header h1 { font-size: 24px; }
-        }
-    </style>
+    .success-card {
+      background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+      border: 2px solid #68d391;
+      border-radius: 16px;
+      padding: 18px;
+      text-align:center;
+      margin-top: 14px;
+    }
+    .success-card .icon { font-size: 44px; margin-bottom: 8px; }
+    .success-card .title { font-size: 18px; font-weight: 900; color:#2f855a; margin-bottom: 6px; }
+    .success-card .message { font-size: 13px; color:#22543d; }
+  </style>
 </head>
+
 <body>
-<div class="container">
+  <div class="container">
     <div class="header">
-        <h1>⏰ Calculadora de Hora Extra</h1>
-        <p>08:48: máx 10h trabalhadas | 07:20: máx 2h extras</p>
+      <h1>⏰ Calculadora de Hora Extra</h1>
+      <p>Regras Senior: hora certa + hora noturna reduzida (sem proporcional)</p>
     </div>
 
     <div class="escala-selector">
-        <label class="escala-option selected">
-            <input type="radio" name="escala" value="08:48" checked onchange="updateEscala()">
-            <div class="escala-time">08:48</div>
-            <div class="escala-label">Jornada de 8h48min</div>
-        </label>
-        <label class="escala-option">
-            <input type="radio" name="escala" value="07:20" onchange="updateEscala()">
-            <div class="escala-time">07:20</div>
-            <div class="escala-label">Jornada de 7h20min</div>
-        </label>
+      <label class="escala-option selected">
+        <input type="radio" name="escala" value="08:48" checked onchange="updateEscala()">
+        <div class="escala-time">08:48</div>
+        <div class="escala-label">Dia: intervalo 01:15</div>
+      </label>
+      <label class="escala-option">
+        <input type="radio" name="escala" value="07:20" onchange="updateEscala()">
+        <div class="escala-time">07:20</div>
+        <div class="escala-label">Dia: intervalo 01:00</div>
+      </label>
     </div>
 
     <div class="input-section">
-        <div class="input-group">
-            <label>🕐 Horário de Entrada</label>
-            <input type="time" id="entrada" value="07:00">
-        </div>
-        <div class="input-group">
-            <label>🕐 Horário de Saída</label>
-            <input type="time" id="saida" value="17:00">
-        </div>
+      <div class="input-group">
+        <label>🕐 Horário de Entrada</label>
+        <input type="time" id="entrada" value="22:29">
+      </div>
+      <div class="input-group">
+        <label>🕐 Horário de Saída</label>
+        <input type="time" id="saida" value="06:14">
+      </div>
     </div>
 
     <button class="calculate-btn" onclick="calcular()">Calcular Jornada</button>
 
     <div class="results" id="results">
-        <div class="result-card">
-            <div class="result-row">
-                <span class="result-label">Escala Selecionada</span>
-                <span class="result-value" id="escala-selected">--</span>
-            </div>
-            <div class="result-row">
-                <span class="result-label">Tempo Total no Local</span>
-                <span class="result-value" id="tempo-total">--</span>
-            </div>
-            <div class="result-row">
-                <span class="result-label">Horas Extras</span>
-                <span class="result-value" id="horas-trabalhadas">--</span>
-            </div>
+      <div class="result-card">
+        <div class="result-row">
+          <span class="result-label">Escala</span>
+          <span class="result-value" id="escala-selected">--</span>
         </div>
+        <div class="result-row">
+          <span class="result-label">Intervalo aplicado</span>
+          <span class="result-value" id="intervalo-aplicado">--</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Tempo total no local</span>
+          <span class="result-value" id="tempo-total">--</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Horas Extras (regra tolerância)</span>
+          <span class="result-value" id="horas-extras">--</span>
+        </div>
+      </div>
 
-        <div id="alert-container"></div>
+      <div id="alert-container"></div>
+
+      <div class="note" id="debug-note"></div>
     </div>
-</div>
+  </div>
 
 <script>
+/** ==========================
+ *  CONFIG (ajuste se precisar)
+ *  ========================== */
+
+// Tolerância: até 10 min não gera extra; 11+ gera
+const TOLERANCIA_MIN = 10;
+
+// Hora noturna (Senior / CLT): 22:00–05:00
+const NOTURNO_INICIO = 22 * 60; // 1320
+const NOTURNO_FIM    = 5 * 60;  // 300
+
+// Intervalo "hora certa" na MADRUGADA
+// Se no Senior o intervalo noturno inicia em outro horário, altere aqui:
+const NIGHT_BREAK_START = "01:00";
+
+// Hora noturna reduzida: 52m30s = 3150s computa como 3600s
+const FATOR_NOTURNO_SEG = 3600 / 3150;
+
+/** ==========================
+ *  UI helpers
+ *  ========================== */
 function updateEscala() {
-    const options = document.querySelectorAll('.escala-option');
-    options.forEach(option => option.classList.remove('selected'));
-    document.querySelector('input[name="escala"]:checked').parentElement.classList.add('selected');
+  document.querySelectorAll('.escala-option').forEach(o => o.classList.remove('selected'));
+  document.querySelector('input[name="escala"]:checked').parentElement.classList.add('selected');
 }
 
 function timeToMinutes(time) {
-    const [hours, minutes] = time.split(':').map(Number);
-    return hours * 60 + minutes;
+  const [h, m] = time.split(':').map(Number);
+  return h * 60 + m;
 }
 
 function minutesToTime(minutes) {
-    const hours = Math.floor(Math.abs(minutes) / 60);
-    const mins = Math.abs(minutes) % 60;
-    return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+  const hh = Math.floor(Math.abs(minutes) / 60);
+  const mm = Math.abs(minutes) % 60;
+  return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
 }
 
+function clockToMin(hhmm) {
+  const [h, m] = hhmm.split(':').map(Number);
+  return h * 60 + m;
+}
+
+function addDayIfNeeded(entradaMin, saidaMin) {
+  return (entradaMin > saidaMin) ? (saidaMin + 1440) : saidaMin;
+}
+
+function overlapMinutes(aStart, aEnd, bStart, bEnd) {
+  const s = Math.max(aStart, bStart);
+  const e = Math.min(aEnd, bEnd);
+  return Math.max(0, e - s);
+}
+
+/** ==========================
+ *  Cálculo Night (Senior-like)
+ *  - Sem proporcional
+ *  - Intervalo hora certa (01:12) na madrugada
+ *  - Redução noturna em segundos + truncar
+ *  ========================== */
+function calcNight(entradaMin, saidaMinCont, intervaloMin) {
+  // 1) Conta noturno/diurno (reais, sem intervalo)
+  let noturnoReal = 0;
+  let diurnoReal  = 0;
+
+  for (let t = entradaMin; t < saidaMinCont; t++) {
+    const clock = t % 1440;
+    const eNoturno = (clock >= NOTURNO_INICIO) || (clock < NOTURNO_FIM);
+    if (eNoturno) noturnoReal++;
+    else diurnoReal++;
+  }
+
+  // 2) Intervalo "hora certa" (aplica no dia seguinte, pois passou da meia-noite)
+  const breakStartClock = clockToMin(NIGHT_BREAK_START);
+  const breakStart = breakStartClock + 1440;
+  const breakEnd = breakStart + intervaloMin;
+
+  const intervaloAplicado = overlapMinutes(entradaMin, saidaMinCont, breakStart, breakEnd);
+
+  // 3) Desconta intervalo primeiro do NOTURNO (mais fiel para turno noturno)
+  let restante = intervaloAplicado;
+
+  const debNot = Math.min(noturnoReal, restante);
+  noturnoReal -= debNot;
+  restante -= debNot;
+
+  const debDiu = Math.min(diurnoReal, restante);
+  diurnoReal -= debDiu;
+  restante -= debDiu;
+
+  const noturnoTrabalhado = noturnoReal;
+  const diurnoTrabalhado  = diurnoReal;
+
+  // 4) Redução noturna (Senior): calcula em segundos e TRUNCA
+  const noturnoCompSeg = (noturnoTrabalhado * 60) * FATOR_NOTURNO_SEG;
+  const noturnoComputado = Math.floor(noturnoCompSeg / 60);
+
+  const computadoTotal = noturnoComputado + diurnoTrabalhado;
+  const trabalhadoRealTotal = noturnoTrabalhado + diurnoTrabalhado;
+
+  return {
+    intervaloAplicado,
+    noturnoTrabalhado,
+    diurnoTrabalhado,
+    noturnoComputado,
+    computadoTotal,
+    trabalhadoRealTotal
+  };
+}
+
+// menor tempo no local (min) para atingir jornada base computada (sem extra)
+function findIdealNightOnSiteDuration(entradaMin, intervaloMin, jornadaBaseMin) {
+  // limites seguros
+  let lo = 1;
+  let hi = 24 * 60; // 1 dia
+  let ans = hi;
+
+  while (lo <= hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    const saida = entradaMin + mid;
+    const r = calcNight(entradaMin, saida, intervaloMin);
+    if (r.computadoTotal >= jornadaBaseMin) {
+      ans = mid;
+      hi = mid - 1;
+    } else {
+      lo = mid + 1;
+    }
+  }
+  return ans;
+}
+
+/** ==========================
+ *  Main
+ *  ========================== */
 function calcular() {
-    const entrada = document.getElementById('entrada').value;
-    const saida = document.getElementById('saida').value;
-    const escalaSelecionada = document.querySelector('input[name="escala"]:checked').value;
+  const entrada = document.getElementById('entrada').value;
+  const saida   = document.getElementById('saida').value;
+  const escala  = document.querySelector('input[name="escala"]:checked').value;
 
-    if (!entrada || !saida) {
-        alert('Por favor, preencha os horários de entrada e saída!');
-        return;
-    }
+  if (!entrada || !saida) {
+    alert('Por favor, preencha os horários de entrada e saída!');
+    return;
+  }
 
-    let entradaMin = timeToMinutes(entrada);
-    let saidaMin = timeToMinutes(saida);
+  const entradaMin = timeToMinutes(entrada);
+  const saidaMin   = timeToMinutes(saida);
+  const passouMeiaNoite = entradaMin > saidaMin;
 
-    const passouMeiaNoite = entradaMin > saidaMin;
+  // jornada base
+  const jornadaBaseMin = (escala === '08:48') ? 528 : 440;
 
-    // intervalo
-    let intervaloMin;
-    if (passouMeiaNoite) {
-        intervaloMin = (escalaSelecionada === '08:48') ? 60 : 72;
-    } else {
-        intervaloMin = (escalaSelecionada === '08:48') ? 75 : 60;
-    }
+  // intervalo conforme regra
+  let intervaloMin;
+  if (passouMeiaNoite) {
+    intervaloMin = 72; // madrugada SEMPRE 01:12
+  } else {
+    intervaloMin = (escala === '08:48') ? 75 : 60; // dia
+  }
 
-    // jornada base
-    let jornadeBaseMin = (escalaSelecionada === '08:48') ? 528 : 440;
+  // tempo total no local (min)
+  const saidaMinCont = addDayIfNeeded(entradaMin, saidaMin);
+  const tempoTotalMin = saidaMinCont - entradaMin;
 
-    // tempo total no local
-    let tempoTotalMin = saidaMin - entradaMin;
-    if (passouMeiaNoite) tempoTotalMin += 24 * 60;
+  // UI básicos
+  document.getElementById('escala-selected').textContent = escala;
+  document.getElementById('tempo-total').textContent = minutesToTime(tempoTotalMin);
 
-    // ===== MADRUGADA =====
-    if (passouMeiaNoite) {
-        const inicioNoturno = 1320; // 22:00
-        const fimNoturno = 300;     // 05:00
+  const alertContainer = document.getElementById('alert-container');
+  alertContainer.innerHTML = '';
+  document.getElementById('debug-note').textContent = '';
 
-        let minutosNoturnosReais = 0;
-        let minutosDiurnosReais = 0;
+  // ===== DIURNO (simples) =====
+  if (!passouMeiaNoite) {
+    // Senior aqui seria por hora certa também, mas sem horário do intervalo informado,
+    // usamos o desconto fixo (como você já fazia), pois o turno diurno normalmente contém o intervalo.
+    const trabalhadoReal = Math.max(0, tempoTotalMin - intervaloMin);
 
-        let horaAtual = entradaMin;
-        let minutosPercorridos = 0;
+    // Extra real no relógio (após cumprir jornada real)
+    const extraReal = Math.max(0, trabalhadoReal - jornadaBaseMin);
+    const faltanteReal = Math.max(0, jornadaBaseMin - trabalhadoReal);
 
-        while (minutosPercorridos < tempoTotalMin) {
-            const horaAtualNoDia = horaAtual % 1440;
-            const eNoturno = (horaAtualNoDia >= inicioNoturno) || (horaAtualNoDia < fimNoturno);
+    document.getElementById('intervalo-aplicado').textContent = minutesToTime(intervaloMin);
 
-            if (eNoturno) minutosNoturnosReais++;
-            else minutosDiurnosReais++;
+    if (extraReal > TOLERANCIA_MIN) {
+      document.getElementById('horas-extras').textContent = `${minutesToTime(extraReal)} extras`;
 
-            horaAtual++;
-            minutosPercorridos++;
-        }
-
-        // ✅ CORREÇÃO PRINCIPAL:
-        // Intervalo é descontado PRIORITARIAMENTE do NOTURNO (não proporcional),
-        // para não alterar a extra quando você só estica a saída.
-        const intervaloNoturno = Math.min(intervaloMin, minutosNoturnosReais);
-        const intervaloDiurno = intervaloMin - intervaloNoturno;
-
-        const minutosNoturnosTrabalhados = Math.max(0, minutosNoturnosReais - intervaloNoturno);
-        const minutosDiurnosTrabalhados = Math.max(0, minutosDiurnosReais - intervaloDiurno);
-
-        // redução noturna
-        const FATOR_NOTURNO = 60 / 52.5;
-        const minutosNoturnosComputados = Math.round(minutosNoturnosTrabalhados * FATOR_NOTURNO);
-
-        const horasTrabalhadasComputadas = minutosNoturnosComputados + minutosDiurnosTrabalhados;
-        const horasExtrasMin = horasTrabalhadasComputadas - jornadeBaseMin;
-
-        const bonusReducao = minutosNoturnosComputados - minutosNoturnosTrabalhados;
-
-        // TAC
-        let ultrapassouLimite = false;
-        let motivoTAC = '';
-        let excedenteMin = 0;
-
-        if (escalaSelecionada === '08:48') {
-            if (horasExtrasMin > 15) {
-                if (horasTrabalhadasComputadas > 600) {
-                    ultrapassouLimite = true;
-                    excedenteMin = horasTrabalhadasComputadas - 600;
-                    motivoTAC = 'Você ultrapassou o limite de 10 horas trabalhadas!';
-                }
-            }
-        } else {
-            if (horasExtrasMin > 10) {
-                if (horasExtrasMin > 120) {
-                    ultrapassouLimite = true;
-                    excedenteMin = horasExtrasMin - 120;
-                    motivoTAC = 'Você ultrapassou o limite de 2 horas extras!';
-                }
-            }
-        }
-
-        // UI
-        document.getElementById('escala-selected').textContent = escalaSelecionada;
-        document.getElementById('tempo-total').textContent =
-            `${minutesToTime(tempoTotalMin)} (${minutesToTime(minutosNoturnosTrabalhados)} noturnas)`;
-
-        const toleranciaMin = (escalaSelecionada === '08:48') ? 15 : 10;
-
-        if (horasExtrasMin >= -toleranciaMin && horasExtrasMin <= toleranciaMin) {
-            document.getElementById('horas-trabalhadas').textContent = 'Jornada completa';
-        } else if (horasExtrasMin > toleranciaMin) {
-            document.getElementById('horas-trabalhadas').textContent = `${minutesToTime(horasExtrasMin)} extras`;
-        } else {
-            document.getElementById('horas-trabalhadas').textContent = `${minutesToTime(Math.abs(horasExtrasMin))} faltantes`;
-        }
-
-        const alertContainer = document.getElementById('alert-container');
-
-        if (ultrapassouLimite) {
-            alertContainer.innerHTML = `
-                <div class="alert-tac">
-                    <div class="icon">⚠️</div>
-                    <div class="title">TAC - Termo de Ajuste de Conduta</div>
-                    <div class="message">${motivoTAC}<br><small>Redução noturna aplicada: +${minutesToTime(bonusReducao)}</small></div>
-                    <div class="overtime">Horas computadas: ${minutesToTime(horasTrabalhadasComputadas)}<br>Excedente: ${minutesToTime(excedenteMin)}</div>
-                </div>
-            `;
-        } else if (horasExtrasMin > toleranciaMin) {
-            alertContainer.innerHTML = `
-                <div class="success-card">
-                    <div class="icon">✅</div>
-                    <div class="title">Hora Extra Registrada</div>
-                    <div class="message">Você fez ${minutesToTime(horasExtrasMin)} de hora extra (dentro do limite)<br><small>Redução noturna: +${minutesToTime(bonusReducao)}</small></div>
-                </div>
-            `;
-        } else if (horasExtrasMin >= -toleranciaMin && horasExtrasMin <= toleranciaMin) {
-            alertContainer.innerHTML = `
-                <div class="success-card">
-                    <div class="icon">✅</div>
-                    <div class="title">Jornada Normal</div>
-                    <div class="message">Você cumpriu sua jornada corretamente${bonusReducao > 0 ? `<br><small>Redução noturna: +${minutesToTime(bonusReducao)}</small>` : ''}</div>
-                </div>
-            `;
-        } else {
-            alertContainer.innerHTML = `
-                <div class="alert-tac">
-                    <div class="icon">⚠️</div>
-                    <div class="title">Atenção!</div>
-                    <div class="message">Você não completou sua jornada${bonusReducao > 0 ? `<br><small>Mesmo com redução noturna: +${minutesToTime(bonusReducao)}</small>` : ''}</div>
-                    <div class="overtime">${minutesToTime(Math.abs(horasExtrasMin))} faltantes</div>
-                </div>
-            `;
-        }
-
-        document.getElementById('results').classList.add('show');
-        return;
-    }
-
-    // ===== DIURNO =====
-    const horasTrabalhadasMin = tempoTotalMin - intervaloMin;
-    const horasExtrasMin = horasTrabalhadasMin - jornadeBaseMin;
-
-    let ultrapassouLimite = false;
-    let motivoTAC = '';
-    let excedenteMin = 0;
-
-    if (escalaSelecionada === '08:48') {
-        if (horasExtrasMin > 10) {
-            if (horasTrabalhadasMin > 600) {
-                ultrapassouLimite = true;
-                excedenteMin = horasTrabalhadasMin - 600;
-                motivoTAC = 'Você ultrapassou o limite de 10 horas trabalhadas!';
-            }
-        }
-    } else {
-        if (horasExtrasMin > 120) {
-            ultrapassouLimite = true;
-            excedenteMin = horasExtrasMin - 120;
-            motivoTAC = 'Você ultrapassou o limite de 2 horas extras!';
-        }
-    }
-
-    document.getElementById('escala-selected').textContent = escalaSelecionada;
-    document.getElementById('tempo-total').textContent = minutesToTime(tempoTotalMin);
-
-    if (horasExtrasMin >= -10 && horasExtrasMin <= 10) {
-        document.getElementById('horas-trabalhadas').textContent = 'Jornada completa';
-    } else if (horasExtrasMin > 10) {
-        document.getElementById('horas-trabalhadas').textContent = `${minutesToTime(horasExtrasMin)} extras`;
-    } else {
-        document.getElementById('horas-trabalhadas').textContent = `${minutesToTime(Math.abs(horasExtrasMin))} faltantes`;
-    }
-
-    const alertContainer = document.getElementById('alert-container');
-
-    if (ultrapassouLimite) {
+      // Limite de 2h extras para 07:20
+      if (escala === '07:20' && extraReal > 120) {
         alertContainer.innerHTML = `
-            <div class="alert-tac">
-                <div class="icon">⚠️</div>
-                <div class="title">TAC - Termo de Ajuste de Conduta</div>
-                <div class="message">${motivoTAC}</div>
-                <div class="overtime">Horas trabalhadas: ${minutesToTime(horasTrabalhadasMin)}<br>Excedente: ${minutesToTime(excedenteMin)}</div>
-            </div>
+          <div class="alert-tac">
+            <div class="icon">⚠️</div>
+            <div class="title">TAC / Limite excedido</div>
+            <div class="message">Você ultrapassou o limite de 2 horas extras.</div>
+            <div class="overtime">Excedente: ${minutesToTime(extraReal - 120)}</div>
+          </div>
         `;
-    } else if (horasExtrasMin > 10) {
+      } else if (escala === '08:48' && trabalhadoReal > 600) {
         alertContainer.innerHTML = `
-            <div class="success-card">
-                <div class="icon">✅</div>
-                <div class="title">Hora Extra Registrada</div>
-                <div class="message">Você fez ${minutesToTime(horasExtrasMin)} de hora extra (dentro do limite permitido)</div>
-            </div>
+          <div class="alert-tac">
+            <div class="icon">⚠️</div>
+            <div class="title">TAC / Limite excedido</div>
+            <div class="message">Você ultrapassou o limite de 10 horas trabalhadas.</div>
+            <div class="overtime">Excedente: ${minutesToTime(trabalhadoReal - 600)}</div>
+          </div>
         `;
-    } else if (horasExtrasMin >= -10 && horasExtrasMin <= 10) {
+      } else {
         alertContainer.innerHTML = `
-            <div class="success-card">
-                <div class="icon">✅</div>
-                <div class="title">Jornada Normal</div>
-                <div class="message">Você cumpriu sua jornada corretamente</div>
-            </div>
+          <div class="success-card">
+            <div class="icon">✅</div>
+            <div class="title">Hora Extra</div>
+            <div class="message">Hora extra dentro do limite, considerando tolerância.</div>
+          </div>
         `;
+      }
+    } else if (faltanteReal > TOLERANCIA_MIN) {
+      document.getElementById('horas-extras').textContent = `${minutesToTime(faltanteReal)} faltantes`;
+      alertContainer.innerHTML = `
+        <div class="alert-tac">
+          <div class="icon">⚠️</div>
+          <div class="title">Atenção</div>
+          <div class="message">Você não completou sua jornada.</div>
+          <div class="overtime">${minutesToTime(faltanteReal)} faltantes</div>
+        </div>
+      `;
     } else {
-        alertContainer.innerHTML = `
-            <div class="alert-tac">
-                <div class="icon">⚠️</div>
-                <div class="title">Atenção!</div>
-                <div class="message">Você não completou sua jornada</div>
-                <div class="overtime">${minutesToTime(Math.abs(horasExtrasMin))} faltantes</div>
-            </div>
-        `;
+      document.getElementById('horas-extras').textContent = `Jornada completa (tolerância)`;
+      alertContainer.innerHTML = `
+        <div class="success-card">
+          <div class="icon">✅</div>
+          <div class="title">Jornada Normal</div>
+          <div class="message">Dentro da tolerância de ${TOLERANCIA_MIN} minutos.</div>
+        </div>
+      `;
     }
 
     document.getElementById('results').classList.add('show');
+    return;
+  }
+
+  // ===== MADRUGADA (Senior-like) =====
+  // 1) Resultado real para exibir (com intervalo hora certa e redução truncada)
+  const real = calcNight(entradaMin, saidaMinCont, intervaloMin);
+  document.getElementById('intervalo-aplicado').textContent = minutesToTime(real.intervaloAplicado);
+
+  // 2) Descobre tempo ideal no local para "bater" a jornada (sem extra)
+  const idealOnSite = findIdealNightOnSiteDuration(entradaMin, intervaloMin, jornadaBaseMin);
+
+  // 3) Extra no relógio (isso evita 01:01 e bate com a simulação do Senior)
+  const extraRealMin = Math.max(0, tempoTotalMin - idealOnSite);
+  const faltanteRealMin = Math.max(0, idealOnSite - tempoTotalMin);
+
+  // TAC (pelo real trabalhado / extra real)
+  let tac = false;
+  let tacMsg = '';
+  let tacExc = 0;
+
+  if (escala === '08:48') {
+    // limite: 10h trabalhadas (real, sem intervalo)
+    if (real.trabalhadoRealTotal > 600) {
+      tac = true;
+      tacMsg = 'Você ultrapassou o limite de 10 horas trabalhadas!';
+      tacExc = real.trabalhadoRealTotal - 600;
+    }
+  } else {
+    // 07:20: limite 2h extras (real no relógio)
+    if (extraRealMin > 120) {
+      tac = true;
+      tacMsg = 'Você ultrapassou o limite de 2 horas extras!';
+      tacExc = extraRealMin - 120;
+    }
+  }
+
+  // Exibir extras respeitando tolerância
+  if (extraRealMin > TOLERANCIA_MIN) {
+    document.getElementById('horas-extras').textContent = `${minutesToTime(extraRealMin)} extras`;
+
+    if (tac) {
+      alertContainer.innerHTML = `
+        <div class="alert-tac">
+          <div class="icon">⚠️</div>
+          <div class="title">TAC / Limite excedido</div>
+          <div class="message">${tacMsg}</div>
+          <div class="overtime">Excedente: ${minutesToTime(tacExc)}</div>
+        </div>
+      `;
+    } else {
+      alertContainer.innerHTML = `
+        <div class="success-card">
+          <div class="icon">✅</div>
+          <div class="title">Hora Extra</div>
+          <div class="message">Hora extra dentro do limite, considerando tolerância.</div>
+        </div>
+      `;
+    }
+  } else if (faltanteRealMin > TOLERANCIA_MIN) {
+    document.getElementById('horas-extras').textContent = `${minutesToTime(faltanteRealMin)} faltantes`;
+    alertContainer.innerHTML = `
+      <div class="alert-tac">
+        <div class="icon">⚠️</div>
+        <div class="title">Atenção</div>
+        <div class="message">Você não completou sua jornada.</div>
+        <div class="overtime">${minutesToTime(faltanteRealMin)} faltantes</div>
+      </div>
+    `;
+  } else {
+    document.getElementById('horas-extras').textContent = `Jornada completa (tolerância)`;
+    alertContainer.innerHTML = `
+      <div class="success-card">
+        <div class="icon">✅</div>
+        <div class="title">Jornada Normal</div>
+        <div class="message">Dentro da tolerância de ${TOLERANCIA_MIN} minutos.</div>
+      </div>
+    `;
+  }
+
+  // Debug opcional (para você conferir com o Senior)
+  const bonusReducao = real.noturnoComputado - real.noturnoTrabalhado;
+  document.getElementById('debug-note').textContent =
+    `Madrugada (Senior-like): Noturno trabalhado ${minutesToTime(real.noturnoTrabalhado)}, diurno trabalhado ${minutesToTime(real.diurnoTrabalhado)} | Redução noturna +${minutesToTime(bonusReducao)} | Ideal (sem extra) no local: ${minutesToTime(idealOnSite)}.`;
+
+  document.getElementById('results').classList.add('show');
 }
 
+// Enter para calcular
 document.querySelectorAll('input[type="time"]').forEach(input => {
-    input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') calcular();
-    });
+  input.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') calcular();
+  });
 });
 </script>
 </body>
