@@ -395,13 +395,9 @@
                 return;
             }
 
-            const entradaMin = timeToMinutes(entrada);
-            const saidaMin = timeToMinutes(saida);
+            let entradaMin = timeToMinutes(entrada);
+            let saidaMin = timeToMinutes(saida);
             
-            // Calcular tempo total no local
-            let tempoTotalMin = saidaMin - entradaMin;
-            if (tempoTotalMin < 0) tempoTotalMin += 24 * 60; // Passou da meia-noite
-
             // Definir intervalo baseado na escala
             let intervaloMin;
             if (escalaSelecionada === '08:48') {
@@ -409,60 +405,67 @@
             } else {
                 intervaloMin = 60; // 1h00min
             }
-
-            // Calcular horas noturnas (22h às 5h = 1320 a 1440 min ou 0 a 300 min)
-            let horasNoturnas = 0;
-            let horasNoturnasTrabalhadas = 0;
             
-            // Se entrada > saída, passou da meia-noite
-            if (entradaMin > saidaMin) {
-                // Calcular minutos trabalhados no período noturno
-                let minutosNoturnosAntesDoIntervalo = 0;
+            // Definir jornada base
+            let jornadeBaseMin;
+            if (escalaSelecionada === '08:48') {
+                jornadeBaseMin = 528; // 8h48min
+            } else {
+                jornadeBaseMin = 440; // 7h20min
+            }
+
+            // Verificar se passou da meia-noite (horário noturno)
+            const passouMeiaNoite = entradaMin > saidaMin;
+            
+            let tempoTotalMin = saidaMin - entradaMin;
+            if (passouMeiaNoite) {
+                tempoTotalMin += 24 * 60;
+            }
+
+            // Se passou da meia-noite, calcular horas noturnas (22h às 5h)
+            let minutosNoturnosReais = 0;
+            let minutosNoturnos Computados = 0;
+            let minutosDiurnosReais = 0;
+            
+            if (passouMeiaNoite) {
+                const inicioNoturno = 1320; // 22h = 1320min
+                const fimNoturno = 300; // 5h = 300min
                 
-                // Período noturno: 22h (1320min) até 5h (300min do dia seguinte)
-                const inicioNoturno = 1320; // 22h
-                const fimNoturno = 300; // 5h
+                let horaAtual = entradaMin;
+                let minutosPercorridos = 0;
                 
-                // Se entrou antes ou durante período noturno
-                if (entradaMin >= inicioNoturno) {
-                    // Trabalhou das entrada até meia-noite
-                    minutosNoturnosAntesDoIntervalo += (1440 - entradaMin);
+                // Percorrer minuto a minuto classificando como noturno ou diurno
+                while (minutosPercorridos < tempoTotalMin) {
+                    const horaAtualNoDia = horaAtual % 1440;
                     
-                    // Trabalhou da meia-noite até saída ou até fim do período noturno
-                    if (saidaMin <= fimNoturno) {
-                        minutosNoturnosAntesDoIntervalo += saidaMin;
+                    // Verificar se está no período noturno (22h-24h ou 0h-5h)
+                    const eNoturno = (horaAtualNoDia >= inicioNoturno) || (horaAtualNoDia < fimNoturno);
+                    
+                    if (eNoturno) {
+                        minutosNoturnosReais++;
                     } else {
-                        minutosNoturnosAntesDoIntervalo += fimNoturno;
+                        minutosDiurnosReais++;
                     }
-                } else if (saidaMin <= fimNoturno) {
-                    // Entrou depois da meia-noite mas ainda no período noturno
-                    minutosNoturnosAntesDoIntervalo += (saidaMin - entradaMin);
+                    
+                    horaAtual++;
+                    minutosPercorridos++;
                 }
                 
-                horasNoturnas = minutosNoturnosAntesDoIntervalo;
+                // Descontar intervalo proporcionalmente
+                const proporcaoNoturna = minutosNoturnosReais / tempoTotalMin;
+                const intervaloNoturno = Math.round(intervaloMin * proporcaoNoturna);
+                const intervaloDiurno = intervaloMin - intervaloNoturno;
                 
-                // Descontar intervalo proporcionalmente das horas noturnas
-                const proporcaoNoturna = horasNoturnas / tempoTotalMin;
-                const intervaloNaNoturna = Math.round(intervaloMin * proporcaoNoturna);
-                horasNoturnasTrabalhadas = horasNoturnas - intervaloNaNoturna;
+                const minutosNoturnosTrabalhados = minutosNoturnosReais - intervaloNoturno;
+                const minutosDiurnosTrabalhados = minutosDiurnosReais - intervaloDiurno;
                 
-                // Aplicar redução: cada 52.5min trabalhados = 60min
-                // Ou seja: minutos reais * (60/52.5) = minutos computados
-                const horasNoturnasComputadas = Math.round(horasNoturnasTrabalhadas * (60 / 52.5));
-                const minutosAdicionaisPorReducao = horasNoturnasComputadas - horasNoturnasTrabalhadas;
+                // Aplicar redução apenas nas horas noturnas
+                // Cada 52.5min trabalhados à noite = 60min computados
+                minutosNoturnosComputados = Math.round(minutosNoturnosTrabalhados * (60 / 52.5));
                 
-                // Calcular horas trabalhadas com a redução noturna
-                const horasTrabalhadasMin = (tempoTotalMin - intervaloMin) + minutosAdicionaisPorReducao;
-                
-                // Calcular jornada base e extras
-                let jornadeBaseMin;
-                if (escalaSelecionada === '08:48') {
-                    jornadeBaseMin = 528; // 8h48min
-                } else {
-                    jornadeBaseMin = 440; // 7h20min
-                }
-                
-                const horasExtrasMin = horasTrabalhadasMin - jornadeBaseMin;
+                // Total computado = noturnas com redução + diurnas sem redução
+                const horasTrabalhadasComputadas = minutosNoturnosComputados + minutosDiurnosTrabalhados;
+                const horasExtrasMin = horasTrabalhadasComputadas - jornadeBaseMin;
                 
                 // Verificar TAC
                 let ultrapassouLimite = false;
@@ -471,9 +474,9 @@
                 
                 if (escalaSelecionada === '08:48') {
                     if (horasExtrasMin > 10) {
-                        if (horasTrabalhadasMin > 600) {
+                        if (horasTrabalhadasComputadas > 600) {
                             ultrapassouLimite = true;
-                            excedenteMin = horasTrabalhadasMin - 600;
+                            excedenteMin = horasTrabalhadasComputadas - 600;
                             motivoTAC = 'Você ultrapassou o limite de 10 horas trabalhadas!';
                         }
                     }
@@ -485,10 +488,13 @@
                     }
                 }
                 
+                const bonusReducao = minutosNoturnosComputados - minutosNoturnosTrabalhados;
+                
                 // Atualizar resultados
                 document.getElementById('escala-selected').textContent = escalaSelecionada;
                 document.getElementById('intervalo-value').textContent = minutesToTime(intervaloMin);
-                document.getElementById('tempo-total').textContent = minutesToTime(tempoTotalMin) + ` (${minutesToTime(horasNoturnasTrabalhadas)} noturnas)`;
+                document.getElementById('tempo-total').textContent = 
+                    `${minutesToTime(tempoTotalMin)} (${minutesToTime(minutosNoturnosTrabalhados)} noturnas)`;
                 document.getElementById('horas-trabalhadas').textContent = 
                     horasExtrasMin >= 0 
                         ? `${minutesToTime(horasExtrasMin)} extras` 
@@ -502,8 +508,8 @@
                         <div class="alert-tac">
                             <div class="icon">⚠️</div>
                             <div class="title">TAC - Termo de Ajuste de Conduta</div>
-                            <div class="message">${motivoTAC}<br><small>Horas noturnas com redução aplicada: +${minutesToTime(minutosAdicionaisPorReducao)}</small></div>
-                            <div class="overtime">Horas trabalhadas: ${minutesToTime(horasTrabalhadasMin)}<br>Excedente: ${minutesToTime(excedenteMin)}</div>
+                            <div class="message">${motivoTAC}<br><small>Redução noturna aplicada: +${minutesToTime(bonusReducao)}</small></div>
+                            <div class="overtime">Horas computadas: ${minutesToTime(horasTrabalhadasComputadas)}<br>Excedente: ${minutesToTime(excedenteMin)}</div>
                         </div>
                     `;
                 } else if (horasExtrasMin > 10) {
@@ -511,7 +517,7 @@
                         <div class="success-card">
                             <div class="icon">✅</div>
                             <div class="title">Hora Extra Registrada</div>
-                            <div class="message">Você fez ${minutesToTime(horasExtrasMin)} de hora extra (dentro do limite permitido)<br><small>Horas noturnas com redução: +${minutesToTime(minutosAdicionaisPorReducao)}</small></div>
+                            <div class="message">Você fez ${minutesToTime(horasExtrasMin)} de hora extra (dentro do limite)<br><small>Redução noturna: +${minutesToTime(bonusReducao)}</small></div>
                         </div>
                     `;
                 } else if (horasExtrasMin >= -10 && horasExtrasMin <= 10) {
@@ -519,7 +525,7 @@
                         <div class="success-card">
                             <div class="icon">✅</div>
                             <div class="title">Jornada Normal</div>
-                            <div class="message">Você cumpriu sua jornada corretamente${horasNoturnasTrabalhadas > 0 ? `<br><small>Horas noturnas com redução: +${minutesToTime(minutosAdicionaisPorReducao)}</small>` : ''}</div>
+                            <div class="message">Você cumpriu sua jornada corretamente${bonusReducao > 0 ? `<br><small>Redução noturna: +${minutesToTime(bonusReducao)}</small>` : ''}</div>
                         </div>
                     `;
                 } else if (horasExtrasMin < -10) {
@@ -527,7 +533,7 @@
                         <div class="alert-tac">
                             <div class="icon">⚠️</div>
                             <div class="title">Atenção!</div>
-                            <div class="message">Você não completou sua jornada</div>
+                            <div class="message">Você não completou sua jornada${bonusReducao > 0 ? `<br><small>Mesmo com redução noturna: +${minutesToTime(bonusReducao)}</small>` : ''}</div>
                             <div class="overtime">${minutesToTime(Math.abs(horasExtrasMin))} faltantes</div>
                         </div>
                     `;
@@ -537,8 +543,7 @@
                 return;
             }
             
-            // CÓDIGO ORIGINAL PARA HORÁRIO DIURNO (entrada < saída)
-            // Calcular horas efetivamente trabalhadas
+            // HORÁRIO DIURNO (não passou da meia-noite)
             const horasTrabalhadasMin = tempoTotalMin - intervaloMin;
             
             // Definir jornada base de cada escala (em minutos trabalhados)
