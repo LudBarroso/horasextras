@@ -394,6 +394,28 @@ function calcular() {
   const saidaMin   = timeToMinutes(saida);
   const passouMeiaNoite = entradaMin > saidaMin;
 
+  // Bloquear turno de madrugada
+  if (passouMeiaNoite) {
+    document.getElementById('results').classList.add('show');
+    document.getElementById('escala-selected').textContent = '--';
+    document.getElementById('intervalo-aplicado').textContent = '--';
+    document.getElementById('tempo-total').textContent = '--';
+    document.getElementById('horas-extras').textContent = '--';
+    document.getElementById('debug-note').textContent = '';
+    document.getElementById('alert-container').innerHTML = `
+      <div class="alert-tac" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-color: #f59e0b;">
+        <div class="icon">🌙</div>
+        <div class="title" style="color: #92400e;">Turno de Madrugada Detectado</div>
+        <div class="message" style="color: #78350f; font-size: 14px; line-height: 1.6;">
+          Esta calculadora é destinada apenas ao turno diurno.<br><br>
+          Para calcular horas extras do turno da madrugada, por favor<br>
+          <strong>procure a Administração de Pessoal.</strong>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
   // jornada base
   const jornadaBaseMin = (escala === '08:48') ? 528 : 440;
 
